@@ -1,0 +1,3 @@
+[submodule "gaming-hype"]
+	path = gaming-hype
+	url = https://github.com/bluesky-social/feed-generator.git
