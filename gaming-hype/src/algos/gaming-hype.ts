@@ -11,7 +11,7 @@ export const handler = async (ctx: AppContext, params: QueryParams) => {
     .selectFrom('post')
     .selectAll()
     .orderBy('indexedAt', 'desc')
-    .limit(500)
+    .limit(1000)
 
   if (params.cursor) {
     const timeStr = new Date(parseInt(params.cursor, 10)).toISOString()

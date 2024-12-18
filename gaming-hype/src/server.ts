@@ -10,6 +10,9 @@ import { FirehoseSubscription } from './subscription'
 import { AppContext, Config } from './config'
 import wellKnown from './well-known'
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 export class FeedGenerator {
   public app: express.Application
   public server?: http.Server
