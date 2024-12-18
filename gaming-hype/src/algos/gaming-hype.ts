@@ -4,34 +4,35 @@ import { AppContext } from '../config'
 export const shortname = 'gaming-hype'
 
 export const handler = async (ctx: AppContext, params: QueryParams) => {
+  // Define the keywords for filtering posts
   const keywords = ['trailer', 'dlc', 'release', 'game', 'update']
 
-  // Fetch posts from the database
+  // Fetch posts from the database without inserting new ones
   let builder = ctx.db
     .selectFrom('post')
-    .selectAll()
+    .selectAll()  // Select all columns, including the 'text' field
     .orderBy('indexedAt', 'desc')
-    .limit(1000)
+    .limit(1000)  // You can adjust this limit based on how many posts you want to fetch
 
+  // Handle cursor for pagination (if provided)
   if (params.cursor) {
     const timeStr = new Date(parseInt(params.cursor, 10)).toISOString()
     builder = builder.where('post.indexedAt', '<', timeStr)
   }
 
+  // Execute the query and fetch the posts
   const res = await builder.execute()
 
-  // Log one sample post for debugging
-  console.log('Sample Post:', res[0]) // Log the first post to check its structure
-
-  // Filter posts based on keywords (update this logic once we identify the correct field)
+  // Filter posts based on the keywords in the 'text' field
   const filteredPosts = res.filter((row) => {
-    const placeholderText = `${row.uri} ${row.cid}`.toLowerCase() // Update placeholder
-    return keywords.some((keyword) => placeholderText.includes(keyword))
+    const text = row.text?.toLowerCase() || '';  // Safely check for 'text' field
+    return keywords.some((keyword) => text.includes(keyword))  // Check if any keyword matches
   })
 
-  console.log('Filtered Posts:', filteredPosts) // Log filtered posts for debugging
+  // Log the filtered posts for debugging
+  console.log('Filtered Posts:', filteredPosts)  // This will show the filtered posts
 
-  // Format the posts for the feed
+  // Format the posts for the feed response
   const feed = filteredPosts.map((row) => ({
     post: row.uri,
   }))
@@ -43,5 +44,6 @@ export const handler = async (ctx: AppContext, params: QueryParams) => {
     cursor = new Date(last.indexedAt).getTime().toString(10)
   }
 
+  // Return the filtered posts along with the cursor
   return { cursor, feed }
 }
